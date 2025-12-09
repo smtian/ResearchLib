@@ -85,7 +85,11 @@ def score_paper(paper: Dict[str, Any], kw_cfg: Dict[str, Any]) -> int:
     根据关键词配置对论文进行简单打分：
 
     - 在 title + abstract 中查找 include_keywords / bio_keywords
-    - 每个命中 +1
+    - 必须同时命中两个关键词库才计分
+      * include_keywords 命中数 = include_hits
+      * bio_keywords 命中数 = bio_hits
+      * 若 include_hits > 0 且 bio_hits > 0，则得分 = include_hits + bio_hits
+      * 否则得分 = 0
     - 命中 exclude_keywords 则直接返回一个很小的分数（淘汰）
 
     返回整数分数（可为负数）。
@@ -103,17 +107,22 @@ def score_paper(paper: Dict[str, Any], kw_cfg: Dict[str, Any]) -> int:
         if word and word in text:
             return -10_000
 
-    score = 0
-
+    # 统计两个关键词库的命中次数
+    include_hits = 0
     for word in include_keywords:
         if word and word in text:
-            score += 1
+            include_hits += 1
 
+    bio_hits = 0
     for word in bio_keywords:
         if word and word in text:
-            score += 1
+            bio_hits += 1
 
-    return score
+    # 只有同时命中两个库才计分，否则得 0 分
+    if include_hits > 0 and bio_hits > 0:
+        return include_hits + bio_hits
+    else:
+        return 0
 
 
 def deduplicate(records: List[Dict[str, Any]], verbose: bool = False) -> List[Dict[str, Any]]:
@@ -130,8 +139,10 @@ def deduplicate(records: List[Dict[str, Any]], verbose: bool = False) -> List[Di
         current = by_id.get(pid)
         if current is None or p.get("score", 0) > current.get("score", 0):
             by_id[pid] = p
+
     if verbose:
         print(f"[filter_rank] Deduplicated from {len(records)} to {len(by_id)} records.")
+
     return list(by_id.values())
 
 

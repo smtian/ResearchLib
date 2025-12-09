@@ -9,4 +9,9 @@ arxiv:
   days_back: 4   # 最近1天
 
 biorxiv:
-  enabled: false   # 先关掉，后续再实现
+  enabled: true            
+  base_url: "https://api.biorxiv.org/details"
+  server: "biorxiv"           
+  days_back: 4                
+  max_results: 200          
+  page_size: 100              

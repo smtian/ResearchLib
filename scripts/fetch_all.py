@@ -4,9 +4,10 @@
 Entry point for fetching papers from all configured sources.
 
 当前版本：
-- 只调用 arXiv（fetch_arxiv）
-- 将结果以 jsonl 形式保存在 data/raw/YYYY-MM-DD_arxiv.jsonl
+- 调用 arXiv（fetch_arxiv）和 bioRxiv（fetch_biorxiv）
+- 将结果以 jsonl 形式保存在 data/raw/YYYY-MM-DD_<source>.jsonl
 """
+
 
 from __future__ import annotations
 
@@ -16,6 +17,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from fetch_arxiv import fetch_arxiv  # 与 scripts/fetch_arxiv.py 同目录
+from fetch_biorxiv import fetch_biorxiv  # 新增：bioRxiv 抓取
+
 
 
 # 仓库根目录：.../bio-ml-papers/
@@ -55,7 +58,18 @@ def main(verbose: bool = True) -> None:
     if verbose:
         print(f"[fetch_all] Saved {len(arxiv_papers)} arxiv papers to {arxiv_path}")
 
-    # 2) 预留其它数据源扩展位（如 bioRxiv、PubMed 等）
+    # 2) bioRxiv
+    if verbose:
+        print("[fetch_all] Fetching from biorxiv...")
+    biorxiv_papers = fetch_biorxiv(verbose=verbose)
+    biorxiv_path = RAW_DIR / f"{today_str}_biorxiv.jsonl"
+    save_jsonl(biorxiv_path, biorxiv_papers)
+    total += len(biorxiv_papers)
+    if verbose:
+        print(f"[fetch_all] Saved {len(biorxiv_papers)} biorxiv papers to {biorxiv_path}")
+
+
+    # 3) 预留其它数据源扩展位（如 bioRxiv、PubMed 等）
     # 未来你可以类似地：
     # from fetch_biorxiv import fetch_biorxiv
     # biorxiv_papers = fetch_biorxiv(verbose=verbose)
