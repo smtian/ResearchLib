@@ -1,33 +1,323 @@
 include_keywords:
+  # —— 机器学习 / 深度学习通用 —— 
+  - machine intelligence
   - artificial intelligence
   - deep learning
   - machine learning
-  - neural network
-  - graph
-  - transformer
-  - representation learning
+  - statistical learning
+  - supervised learning
+  - unsupervised learning
+  - semi-supervised learning
   - self-supervised
-  - diffusion
-  - generative
+  - reinforcement learning
+  - transfer learning
+  - meta-learning
+  - few-shot learning
+
+  - neural network
+  - neural networks
+  - convolutional neural network
+  - convolutional neural networks
+  - CNN
+  - recurrent neural network
+  - recurrent neural networks
+  - RNN
+  - LSTM
+
+  - transformer
+  - transformers
+  - attention mechanism
+  - attention-based
+
+  - graph
+  - graph-based
+  - graph neural network
+  - graph neural networks
+  - graph convolutional network
+  - graph convolutional networks
+  - GNN
+  - GCN
+
+  - representation learning
+  - feature learning
+  - manifold learning
+  - embeddings
+  - embedding
+  - latent representation
+  - latent space
+
+  - autoencoder
+  - autoencoders
+  - variational autoencoder
+  - variational autoencoders
+  - VAE
+  - generative model
+  - generative models
+  - generative adversarial network
+  - generative adversarial networks
+  - GAN
+  - diffusion model
+  - diffusion models
+
+  - contrastive learning
+  - contrastive loss
+
+  # —— 大模型 / 语言模型 / 多模态 —— 
+  - language model
+  - language models
+  - large language model
+  - large language models
+  - LLM
+  - foundation model
+  - foundation models
+  - multimodal model
+  - multimodal learning
+  - sequence-to-sequence
+  - seq2seq
+  - BERT
+  - GPT
+
+  # —— 经典机器学习算法 —— 
+  - support vector machine
+  - SVM
+  - random forest
+  - gradient boosting
+  - XGBoost
+  - kernel method
+  - kernel methods
+
+  # —— 方法/模型开发 —— 
+  - algorithm
+  - algorithms
+  - computational method
+  - computational methods
+  - statistical method
+  - statistical methods
+  - predictive model
+  - predictive models
+  - classifier
+  - classification model
+  - regression model
+  - clustering algorithm
+  - dimensionality reduction
+  - feature selection
+  - model interpretation
+  - model interpretability
+  - model explainability
+
+  # —— 工具 / 软件 / 管线 —— 
+  - software
+  - tool
+  - tools
+  - package
+  - packages
+  - library
+  - libraries
+  - framework
+  - frameworks
+  - pipeline
+  - pipelines
+  - workflow
+  - workflows
+  - platform
+  - platforms
+  - web server
+  - webserver
+  - GUI
+  - benchmark
+  - benchmarking
 
 bio_keywords:
-  - microbiome
+  # —— 分子 / 蛋白 / 肽 / 抗菌 —— 
+  - molecule
+  - molecular
+  - macromolecule
+  - macromolecular
+
+  - protein
+  - proteins
   - peptide
-  - antimicrobial 
-  - single-cell
-  - scRNA-seq
-  - multi-omics
-  - genomics
-  - proteomics
-  - epigenomics
-  - sequence
-  - variant
+  - peptides
+  - antimicrobial
+  - antibody
+  - antibodies
+  - antigen
+  - enzyme
+  - enzymes
+
+  # —— 基因 / 表达 / 转录组 —— 
+  - gene
+  - genes
   - gene expression
-  - pathway
+  - expression profile
+  - expression profiling
+  - transcript
+  - transcripts
+  - transcriptome
+  - transcriptomes
+  - transcriptomic
+  - transcriptomics
+
+  # —— 基因组 / 表观组 —— 
+  - genome
+  - genomes
+  - genomic
+  - genomics
+  - epigenome
+  - epigenomic
+  - epigenomics
+  - epigenetic
+  - epigenetics
+  - methylome
+  - methylation
+  - chromatin
+  - enhancer
+  - promoter
+
+  # —— 序列 / 测序 / 单细胞 / 空间组学 —— 
+  - sequence
+  - sequences
+  - sequencing
+  - high-throughput sequencing
+  - next-generation sequencing
+  - NGS
+
+  - RNA-seq
+  - RNAseq
+  - bulk RNA-seq
+
+  - scRNA-seq
+  - scRNAseq
+  - single-cell
+  - single cell
+  - single-cell RNA-seq
+  - single cell RNA sequencing
+
+  - scATAC-seq
+  - ATAC-seq
+  - ChIP-seq
+  - Hi-C
+  - spatial transcriptomics
+  - spatial omics
+
+  # —— 各类 omics / 微生物组 —— 
+  - multi-omics
+  - multiomics
+  - multi-omic
+
+  - proteomics
+  - proteome
+  - metabolomics
+  - metabolome
+  - lipidomics
+
+  - metagenomics
+  - metagenomic
+  - microbiome
+  - microbiota
+  - 16S rRNA
+  - shotgun sequencing
+  - metatranscriptomics
+
+  # —— 变异 / 群体遗传 —— 
+  - variant
+  - variants
+  - mutation
+  - mutations
+  - SNP
+  - SNPs
+  - SNV
+  - SNVs
+  - indel
+  - indels
+  - copy number variation
+  - copy number variations
+  - CNV
+  - CNVs
+  - structural variant
+  - structural variants
+  - GWAS
+  - genome-wide association
+  - QTL
+  - eQTL
+  - linkage disequilibrium
+  - haplotype
   - population genetics
+  - population genomics
+
+  # —— 结构生物学 / 相互作用 —— 
+  - structure
+  - 3D structure
+  - tertiary structure
+  - secondary structure
+  - protein structure
+  - protein folding
+  - docking
+  - molecular docking
+  - binding site
+  - binding affinity
+  - protein-protein interaction
+  - protein-protein interactions
+  - PPI
+  - PPI network
+
+  # —— 通路 / 网络 / 系统生物学 —— 
+  - pathway
+  - pathways
+  - signaling pathway
+  - metabolic pathway
+  - gene regulatory network
+  - regulatory network
+  - GRN
+  - systems biology
+  - metabolic network
+
+  # —— 药物发现 / 设计 —— 
+  - drug discovery
+  - drug design
+  - drug repurposing
+  - virtual screening
+  - QSAR
+  - ADMET
+  - toxicity prediction
+
+  # —— 疾病 / 免疫相关（仍属计算生物学/生信范畴） —— 
+  - cell line
+  - cell lines
+  - tissue
+  - tissues
+  - tumor
+  - tumours
+  - cancer
+  - carcinoma
+  - leukemia
+  - lymphoma
+
+  - immunology
+  - immune repertoire
+  - TCR
+  - BCR
+  - neoantigen
+  - HLA
+  - MHC
+
+  # —— 学科名称（帮助泛化到“计算生物学/生信”文章） —— 
+  - bioinformatics
+  - computational biology
+  - computational genomics
+  - biomedical informatics
+  - cheminformatics
 
 exclude_keywords:
   - astrophysics
   - cosmology
+  - astronomy
+  - galactic
+  - galaxy
+  - galaxies
+  - exoplanet
+  - planetary science
+  - solar physics
+  - space telescope
 
 min_score: 2
