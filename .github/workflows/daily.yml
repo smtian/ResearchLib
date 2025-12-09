@@ -1,0 +1,54 @@
+name: Daily Paper Fetch
+
+on:
+  schedule:
+    # 每天 03:00 UTC 触发（你可以按需要修改）
+    - cron: "0 3 * * *"
+  # 允许在 GitHub Web 界面手动触发
+  workflow_dispatch:
+
+jobs:
+  fetch-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fetch_all
+        run: |
+          python scripts/fetch_all.py
+
+      - name: Run filter_rank
+        run: |
+          python scripts/filter_rank.py --verbose
+
+      - name: Run generate_report
+        run: |
+          python scripts/generate_report.py --verbose
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 检查是否有文件变更
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: daily paper update"
+            git push
+          else
+            echo "No changes to commit."
+          fi

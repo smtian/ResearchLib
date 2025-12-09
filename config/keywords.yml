@@ -1,0 +1,33 @@
+include_keywords:
+  - artificial intelligence
+  - deep learning
+  - machine learning
+  - neural network
+  - graph
+  - transformer
+  - representation learning
+  - self-supervised
+  - diffusion
+  - generative
+
+bio_keywords:
+  - microbiome
+  - peptide
+  - antimicrobial 
+  - single-cell
+  - scRNA-seq
+  - multi-omics
+  - genomics
+  - proteomics
+  - epigenomics
+  - sequence
+  - variant
+  - gene expression
+  - pathway
+  - population genetics
+
+exclude_keywords:
+  - astrophysics
+  - cosmology
+
+min_score: 1
