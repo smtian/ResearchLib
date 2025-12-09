@@ -120,9 +120,11 @@ def score_paper(paper: Dict[str, Any], kw_cfg: Dict[str, Any]) -> int:
 
     # 只有同时命中两个库才计分，否则得 0 分
     if include_hits > 0 and bio_hits > 0:
-        return include_hits + bio_hits
+        bio_score = min(bio_hits, 2)  # bio_keywords 贡献的得分上限为 2
+        return include_hits + bio_score
     else:
         return 0
+
 
 
 def deduplicate(records: List[Dict[str, Any]], verbose: bool = False) -> List[Dict[str, Any]]:

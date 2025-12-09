@@ -3,7 +3,7 @@ name: Daily Paper Fetch
 on:
   schedule:
     # 每天 03:00 UTC 触发（你可以按需要修改）
-    - cron: "0 3 * * *"
+    - cron: "0 1 * * *"
   # 允许在 GitHub Web 界面手动触发
   workflow_dispatch:
 
