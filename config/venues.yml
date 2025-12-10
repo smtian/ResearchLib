@@ -1,0 +1,190 @@
+venues:
+  - id: nar
+    name: "Nucleic Acids Research"
+    publisher: "Oxford University Press"
+    issn:
+      print: "0305-1048"
+      online: "1362-4962"
+    website: "https://academic.oup.com/nar"
+    tier: "A"
+    topics: ["bioinformatics", "databases", "web-servers", "methods", "tools"]
+    notes: "重点关注 Database issue 和 Web Server issue 上的新数据库/工具文章"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: nar_genomics_bioinformatics
+    name: "NAR Genomics and Bioinformatics"
+    publisher: "Oxford University Press"
+    issn:
+      online: "2631-9268"
+    website: "https://academic.oup.com/nargab"
+    tier: "A"
+    topics: ["genomics", "bioinformatics", "methods", "tools"]
+    notes: "NAR 子刊，偏重基因组学和生物信息方法"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: database
+    name: "Database: The Journal of Biological Databases and Curation"
+    publisher: "Oxford University Press"
+    issn:
+      online: "1758-0463"
+    website: "https://academic.oup.com/database"
+    tier: "A"
+    topics: ["databases", "biocuration", "resources", "bioinformatics"]
+    notes: "数据库与生物注释，适合抓工具型/资源型论文"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: bioinformatics
+    name: "Bioinformatics"
+    publisher: "Oxford University Press"
+    issn:
+      print: "1367-4803"
+      online: "1367-4811"
+    website: "https://academic.oup.com/bioinformatics"
+    tier: "A"
+    topics: ["bioinformatics", "computational-biology", "algorithms", "software", "methods"]
+    notes: "ISCB 官方期刊之一，算法与软件方法非常集中"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: briefings_in_bioinformatics
+    name: "Briefings in Bioinformatics"
+    publisher: "Oxford University Press"
+    issn:
+      print: "1467-5463"
+      online: "1477-4054"
+    website: "https://academic.oup.com/bib"
+    tier: "A"
+    topics: ["bioinformatics", "reviews", "databases", "tools", "methods"]
+    notes: "综述+方法/工具类文章较多，可以帮助了解方向和成熟工具"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: bmc_bioinformatics
+    name: "BMC Bioinformatics"
+    publisher: "BioMed Central / Springer Nature"
+    issn:
+      online: "1471-2105"
+    website: "https://bmcbioinformatics.biomedcentral.com"
+    tier: "B"
+    topics: ["bioinformatics", "software", "algorithms", "machine-learning", "methods"]
+    notes: "开放获取，工具与算法类文章量大"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: plos_computational_biology
+    name: "PLOS Computational Biology"
+    publisher: "Public Library of Science"
+    issn:
+      print: "1553-734X"
+      online: "1553-7358"
+    website: "https://journals.plos.org/ploscompbiol/"
+    tier: "A"
+    topics: ["computational-biology", "bioinformatics", "methods", "models", "ML"]
+    notes: "ISCB 官方期刊之一，计算生物+方法模型导向"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: genome_biology
+    name: "Genome Biology"
+    publisher: "BioMed Central"
+    issn:
+      online: "1474-760X"
+    website: "https://genomebiology.biomedcentral.com"
+    tier: "A"
+    topics: ["genomics", "single-cell", "multi-omics", "methods", "resources"]
+    notes: "基因组学顶刊，方法与资源型文章也很多"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: genome_research
+    name: "Genome Research"
+    publisher: "Cold Spring Harbor Laboratory Press"
+    issn:
+      print: "1088-9051"
+      online: "1549-5469"
+    website: "https://genome.cshlp.org"
+    tier: "A"
+    topics: ["genomics", "epigenomics", "computational-biology", "methods"]
+    notes: "偏基因组学，但不少高水平计算/方法论文"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: gigascience
+    name: "GigaScience"
+    publisher: "GigaScience Press / Oxford University Press"
+    issn:
+      online: "2047-217X"
+    website: "https://academic.oup.com/gigascience"
+    tier: "B"
+    topics: ["big-data", "omics", "bioinformatics", "data-resources", "workflows"]
+    notes: "开放获取，强调大数据、数据资源与可重复分析工具"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: nature_methods
+    name: "Nature Methods"
+    publisher: "Nature Portfolio"
+    issn:
+      print: "1548-7091"
+      online: "1548-7105"
+    website: "https://www.nature.com/nmeth/"
+    tier: "A+"
+    topics: ["methods", "imaging", "single-cell", "sequencing", "computational-methods"]
+    notes: "强方法导向，关注其中计算分析/数据处理/ML 相关工作"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: nature_biotechnology
+    name: "Nature Biotechnology"
+    publisher: "Nature Portfolio"
+    issn:
+      print: "1087-0156"
+      online: "1546-1696"
+    website: "https://www.nature.com/nbt/"
+    tier: "A+"
+    topics: ["biotechnology", "genomics", "bioinformatics", "methods", "tools"]
+    notes: "偏应用与产业，但很多重要的组学方法/平台论文"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: cell_systems
+    name: "Cell Systems"
+    publisher: "Cell Press"
+    issn:
+      print: "2405-4712"
+      online: "2405-4720"
+    website: "https://www.cell.com/cell-systems/home"
+    tier: "A"
+    topics: ["systems-biology", "computational-biology", "networks", "ML", "methods"]
+    notes: "系统生物学与计算方法结合度高"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
+
+  - id: patterns
+    name: "Patterns"
+    publisher: "Cell Press / Elsevier"
+    issn:
+      online: "2666-3899"
+    website: "https://www.cell.com/patterns/home"
+    tier: "B"
+    topics: ["data-science", "ML", "AI", "bioinformatics", "methods", "software"]
+    notes: "数据科学综合期刊，筛选生物/医学方向数据方法论文"
+    fetcher: crossref
+    fetcher_params:
+      days_back: 3
