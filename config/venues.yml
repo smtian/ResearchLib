@@ -12,7 +12,7 @@ venues:
     notes: "综合科学顶刊，重点关注生命科学/医学方向与计算/组学方法相关工作"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: science
     name: "Science"
@@ -26,7 +26,7 @@ venues:
     notes: "AAAS 综合科学顶刊，筛选生命科学/医学及计算相关高影响论文"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_communications
     name: "Nature Communications"
@@ -39,7 +39,7 @@ venues:
     notes: "开放获取综合期刊，重点关注组学/计算生物/方法学相关文章"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: science_advances
     name: "Science Advances"
@@ -52,7 +52,7 @@ venues:
     notes: "AAAS 开放获取综合期刊，关注生命科学与数据/方法类高影响工作"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: pnas
     name: "Proceedings of the National Academy of Sciences of the USA"
@@ -66,7 +66,7 @@ venues:
     notes: "美国科学院院刊，多学科高水平论文，关注计算与组学相关研究"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   # ===== 生命科学 / 生物医学综合顶刊 =====
   - id: cell
@@ -81,7 +81,7 @@ venues:
     notes: "生命科学顶刊，筛选与组学分析、计算建模、系统生物学相关论文"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_medicine
     name: "Nature Medicine"
@@ -95,7 +95,7 @@ venues:
     notes: "医学与转化研究顶刊，关注临床组学、AI 诊疗与数字医学相关工作"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_biotechnology
     name: "Nature Biotechnology"
@@ -109,7 +109,7 @@ venues:
     notes: "偏应用与产业，但很多重要的组学方法/平台论文"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_biomedical_engineering
     name: "Nature Biomedical Engineering"
@@ -122,7 +122,7 @@ venues:
     notes: "生物医学工程与技术平台顶刊，关注成像/诊疗设备与相关计算分析方法"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: gut
     name: "Gut"
@@ -136,7 +136,7 @@ venues:
     notes: "消化与肝病临床顶刊，重点关注微生物组/多组学与计算分析相关研究"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   # ===== 基因组学 / 进化 / 多组学 =====
   - id: genome_biology
@@ -150,7 +150,7 @@ venues:
     notes: "基因组学顶刊，方法与资源型文章也很多"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: genome_research
     name: "Genome Research"
@@ -164,7 +164,7 @@ venues:
     notes: "偏基因组学，但不少高水平计算/方法论文"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_ecology_evolution
     name: "Nature Ecology & Evolution"
@@ -177,7 +177,7 @@ venues:
     notes: "生态与进化领域顶刊，可关注群体/宏基因组、系统发育与方法学相关工作"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nar_genomics_bioinformatics
     name: "NAR Genomics and Bioinformatics"
@@ -190,7 +190,7 @@ venues:
     notes: "NAR 子刊，偏重基因组学和生物信息方法"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   # ===== 数据库 / 生物信息 / 计算方法 =====
   - id: nar
@@ -205,7 +205,7 @@ venues:
     notes: "重点关注 Database issue 和 Web Server issue 上的新数据库/工具文章"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: database
     name: "Database: The Journal of Biological Databases and Curation"
@@ -218,7 +218,7 @@ venues:
     notes: "数据库与生物注释，适合抓工具型/资源型论文"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: bioinformatics
     name: "Bioinformatics"
@@ -232,7 +232,7 @@ venues:
     notes: "ISCB 官方期刊之一，算法与软件方法非常集中"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: plos_computational_biology
     name: "PLOS Computational Biology"
@@ -246,7 +246,7 @@ venues:
     notes: "ISCB 官方期刊之一，计算生物+方法模型导向"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: briefings_in_bioinformatics
     name: "Briefings in Bioinformatics"
@@ -260,7 +260,7 @@ venues:
     notes: "综述+方法/工具类文章较多，可以帮助了解方向和成熟工具"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: cell_systems
     name: "Cell Systems"
@@ -274,7 +274,7 @@ venues:
     notes: "系统生物学与计算方法结合度高"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: nature_methods
     name: "Nature Methods"
@@ -288,7 +288,7 @@ venues:
     notes: "强方法导向，关注其中计算分析/数据处理/ML 相关工作"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1
 
   - id: protein_science
     name: "Protein Science"
@@ -302,4 +302,4 @@ venues:
     notes: "以蛋白结构与功能为主，关注结构预测、设计等计算方法和相关工具"
     fetcher: crossref
     fetcher_params:
-      days_back: 3
+      days_back: 1

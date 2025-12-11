@@ -6,14 +6,71 @@ import sys
 from datetime import date
 from typing import Optional
 
+from paper_tracker.config import load_venues
+from paper_tracker.venues import create_fetchers_for_config
+from paper_tracker.storage import upsert_papers
+
+
+
+def _effective_days_back_for_venue(args: argparse.Namespace, venue) -> int:
+    """
+    计算某个 venue 最终使用的 days_back：
+
+    优先级：
+    1. CLI 显式传入 --days-back
+    2. venues.yml 中该 venue 的 fetcher_params.days_back
+    3. 一个安全的兜底默认值（例如 3）
+    """
+    if args.days_back is not None:
+        return args.days_back
+
+    # 来自配置的默认值
+    cfg_days = None
+    if getattr(venue, "fetcher_params", None) is not None:
+        cfg_days = getattr(venue.fetcher_params, "days_back", None)
+
+    if isinstance(cfg_days, int) and cfg_days > 0:
+        return cfg_days
+
+    # 最后兜底
+    return 3
+
 
 def _cmd_fetch_venues(args: argparse.Namespace) -> None:
     """
-    拉取期刊最新论文（骨架版）。
-    后续会在这里调用 venues fetcher，并写入索引。
+    拉取期刊最新论文：
+    - 从 venues.yml 加载期刊配置
+    - 为每个 venue 创建对应 fetcher
+    - 调用 fetch_recent(days_back)
+    - 通过 upsert_papers() 写入索引并去重
     """
-    print(f"[fetch-venues] days_back={args.days_back}")
+    venues_cfg = load_venues()
+    fetchers = create_fetchers_for_config(venues_cfg)
 
+    total_fetched = 0
+    total_new = 0
+
+    for fetcher in fetchers:
+        venue = fetcher.venue
+        venue_id = venue.id
+
+        days_back = _effective_days_back_for_venue(args, venue)
+        candidates = fetcher.fetch_recent(days_back=days_back)
+        fetched_count = len(candidates)
+        total_fetched += fetched_count
+
+        new_papers = upsert_papers(candidates)
+        new_count = len(new_papers)
+        total_new += new_count
+
+        print(
+            f"[fetch-venues] venue={venue_id} days_back={days_back} "
+            f"fetched={fetched_count} new={new_count}"
+        )
+
+    print(
+        f"[fetch-venues] total_fetched={total_fetched} total_new={total_new}"
+    )
 
 def _cmd_resolve_sources(args: argparse.Namespace) -> None:
     """
@@ -67,8 +124,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_fetch.add_argument(
         "--days-back",
         type=int,
-        default=3,
-        help="How many days back to fetch recent papers from venues (default: 3).",
+        default=None,
+        help=(
+            "How many days back to fetch recent papers. "
+            "If not set, use per-venue fetcher_params.days_back (or its default)."
+        ),
     )
     p_fetch.set_defaults(func=_cmd_fetch_venues)
 
