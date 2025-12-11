@@ -1,0 +1,2 @@
+[console_scripts]
+paper-tracker = paper_tracker.cli:main

@@ -1,0 +1,8 @@
+README.md
+setup.cfg
+setup.py
+src/paper_tracker.egg-info/PKG-INFO
+src/paper_tracker.egg-info/SOURCES.txt
+src/paper_tracker.egg-info/dependency_links.txt
+src/paper_tracker.egg-info/entry_points.txt
+src/paper_tracker.egg-info/top_level.txt
