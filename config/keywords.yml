@@ -1,4 +1,4 @@
-include_keywords:
+include_keywords_1:
   # —— 机器学习 / 深度学习通用 —— 
   - machine intelligence
   - artificial intelligence
@@ -127,7 +127,7 @@ include_keywords:
   - benchmark
   - benchmarking
 
-bio_keywords:
+include_keywords_2:
   # —— 分子 / 蛋白 / 肽 / 抗菌 —— 
   - molecule
   - molecular
