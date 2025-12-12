@@ -1,40 +1,30 @@
 # src/paper_tracker/cli.py
 from __future__ import annotations
 
-import argparse
 import sys
-from datetime import date
+import argparse
+import logging
+from datetime import datetime, timezone
 from typing import Optional
 
+# ----------for venues--------------
 from paper_tracker.config import load_venues
 from paper_tracker.venues import create_fetchers_for_config
-from paper_tracker.storage import upsert_papers
+from paper_tracker.storage import upsert_papers, load_all_papers
+from paper_tracker.utils import _effective_days_back_for_venue
 
+# ----------for sources--------------
+from paper_tracker.utils import (
+    build_metadata_sources,
+    store_full_abstract,
+    select_best_fields,
+    paper_needs_enrichment,
+    ENRICHMENT_VERSION,
+)
+from paper_tracker.sources.base import SourceEnrichmentResult
 
-
-def _effective_days_back_for_venue(args: argparse.Namespace, venue) -> int:
-    """
-    计算某个 venue 最终使用的 days_back：
-
-    优先级：
-    1. CLI 显式传入 --days-back
-    2. venues.yml 中该 venue 的 fetcher_params.days_back
-    3. 一个安全的兜底默认值（例如 3）
-    """
-    if args.days_back is not None:
-        return args.days_back
-
-    # 来自配置的默认值
-    cfg_days = None
-    if getattr(venue, "fetcher_params", None) is not None:
-        cfg_days = getattr(venue.fetcher_params, "days_back", None)
-
-    if isinstance(cfg_days, int) and cfg_days > 0:
-        return cfg_days
-
-    # 最后兜底
-    return 3
-
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, force=True)
 
 def _cmd_fetch_venues(args: argparse.Namespace) -> None:
     """
@@ -74,10 +64,102 @@ def _cmd_fetch_venues(args: argparse.Namespace) -> None:
 
 def _cmd_enrich_metadata(args: argparse.Namespace) -> None:
     """
-    解析开放获取 PDF 源（骨架版）。
-    后续会在这里根据 DOI/标题调用 arxiv/biorxiv 等 source 解析器。
+    统一元数据富集协调：
+
+    - 根据 sources.yml 中的配置，调用 crossref/pubmed/arxiv/biorxiv 等 source；
+    - 每个 source 独立基于 Paper（来自 fetch-venues）尽力返回 SourceEnrichmentResult；
+    - 按 priority * confidence 分别选出最佳 pdf_url 和 abstract；
+    - 将 pdf_url、abstract_source、enrichment_version 更新回 papers.jsonl；
+    - full abstract 写入冷存储 data/cold/abstracts/YYYY-MM.jsonl.gz。
     """
-    print(f"[enrich_metadata] since_days={args.since_days}")
+    since_days = getattr(args, "since_days", 0) or 0
+    print(f"[enrich_metadata] since_days={since_days}")
+
+    cfg_by_id, instances_by_id = build_metadata_sources()
+    if not instances_by_id:
+        print("[enrich_metadata] no enabled metadata sources, skip.")
+        return
+
+    papers = load_all_papers()
+    now = datetime.now(timezone.utc)
+
+    # 根据简单规则筛选本次需要富集的论文
+    target_papers = [p for p in papers if paper_needs_enrichment(p, since_days, now)]
+    if not target_papers:
+        print("[enrich_metadata] no papers to enrich.")
+        return
+
+    updated = []
+    total = len(target_papers)
+
+    for idx, paper in enumerate(target_papers, start=1):
+        per_source_results: dict[str, SourceEnrichmentResult] = {}
+
+        for sid, src in instances_by_id.items():
+            try:
+                res = src.enrich(paper)
+            except Exception as exc:
+                logger.warning(
+                    "enrich_metadata: source '%s' failed for paper id=%s: %s",
+                    sid,
+                    getattr(paper, "id", None),
+                    exc,
+                )
+                continue
+
+            if res.confidence > 0 and (res.pdf_url or res.abstract or res.metadata):
+                per_source_results[sid] = res
+
+        if not per_source_results:
+            continue
+
+        best_pdf_url, pdf_source_id, best_abstract, abs_source_id = select_best_fields(
+            cfg_by_id, per_source_results
+        )
+
+        changed = False
+
+        # 更新 pdf_url
+        if best_pdf_url and best_pdf_url != getattr(paper, "pdf_url", None):
+            paper.pdf_url = best_pdf_url
+            changed = True
+
+        # 更新摘要相关：full abstract 写冷存储 + abstract_source / enrichment_version 写回索引
+        if best_abstract and abs_source_id:
+            store_full_abstract(paper.id, abs_source_id, best_abstract)
+
+            if hasattr(paper, "abstract_source"):
+                if getattr(paper, "abstract_source", None) != abs_source_id:
+                    paper.abstract_source = abs_source_id
+                    changed = True
+
+            if hasattr(paper, "enrichment_version"):
+                if getattr(paper, "enrichment_version", None) != ENRICHMENT_VERSION:
+                    paper.enrichment_version = ENRICHMENT_VERSION
+                    changed = True
+
+        if changed:
+            updated.append(paper)
+
+        if idx % 5 == 0:
+            logger.info(
+                "enrich_metadata progress: %d/%d papers processed, %d updated",
+                idx,
+                total,
+                len(updated),
+            )
+
+    if not updated:
+        print("[enrich_metadata] no papers updated.")
+        return
+
+    # 写回索引
+    new_items = upsert_papers(updated)
+    print(
+        f"[enrich_metadata] processed={len(target_papers)}, "
+        f"updated={len(updated)}, newly_inserted={len(new_items)}"
+    )
+
 
 
 def _cmd_score_papers(args: argparse.Namespace) -> None:
@@ -172,7 +254,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument(
         "--date",
         type=str,
-        default=date.today().isoformat(),
+        default=datetime.today().isoformat(),
         help="Date for the report in YYYY-MM-DD format (default: today).",
     )
     p_report.set_defaults(func=_cmd_generate_daily_report)

@@ -78,10 +78,10 @@ class Paper:
     abstract_source: Optional[str] = None
     # oa_status: Optional[str] = None
     # oa_source: Optional[str] = None
-    metadata_sources: List[str] = field(default_factory=list)
+    # metadata_sources: List[str] = field(default_factory=list)
     enrichment_version: Optional[str] = None
 
-    short_abstract: Optional[str] = None
+    # short_abstract: Optional[str] = None
 
     score_summary: Optional[Dict[str, Any]] = None
     score_version: Optional[str] = None
