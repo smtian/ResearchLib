@@ -24,8 +24,8 @@ def test_load_keywords_default():
     """默认路径下的 keywords.yml 能成功加载并返回正确类型。"""
     cfg = load_keywords()
     assert isinstance(cfg, KeywordsConfig)
-    assert isinstance(cfg.include_keywords, list)
-    assert isinstance(cfg.bio_keywords, list)
+    assert isinstance(cfg.include_keywords_1, list)
+    assert isinstance(cfg.include_keywords_2, list)
     assert isinstance(cfg.exclude_keywords, list)
 
 
@@ -39,6 +39,9 @@ def test_load_sources_default():
         assert src.type  # 非空字符串
         assert isinstance(src.enabled, bool)
         assert isinstance(src.search_by, list)
+        assert isinstance(src.provides, list)
+        assert isinstance(src.priority, dict)
+
 
 
 def test_load_venues_default():

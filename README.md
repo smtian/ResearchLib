@@ -43,6 +43,13 @@ paper-tracker 是一个面向计算生物学 / 机器学习领域的论文日常
 - 操作系统：Linux / macOS / Windows 均可
 - 已安装 `git` 和 `pip`
 
+
+### 2. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
 ---
 
 ## 安装与本地开发
@@ -52,8 +59,8 @@ paper-tracker 是一个面向计算生物学 / 机器学习领域的论文日常
 ### 1. 克隆仓库
 
 ```bash
-git clone <你的仓库地址> bio-ml-papers
-cd bio-ml-papers
+git clone https://github.com/Sheldon04/paper-tracker.git
+cd paper-tracker
 ```
 
 ### 2. 创建虚拟环境
@@ -68,11 +75,9 @@ source .venv/bin/activate
 # .venv\Scripts\Activate.ps1
 ```
 
-
-
 > 说明：你可以使用 `python-dotenv` 在程序启动时自动加载 `.env`，也可以在 GitHub Actions 中通过 `env:` 直接配置相同的变量。
 
-### 3. 以开发模式安装项目
+### 3. 安装项目
 
 在仓库根目录执行：
 
@@ -80,20 +85,10 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-如果你为开发环境单独配置了依赖（如在 `pyproject.toml` / `setup.cfg` 中定义了 `dev` extra），也可以：
-
-```bash
-pip install -e ".[dev]"
-```
-
-### 4. 验证安装
-
 安装完成后，应当能看到 CLI 帮助信息：
 
 ```bash
 paper-tracker --help
-# 或者（如果暂未配置 entry point）
-python -m paper_tracker.cli --help
 ```
 
 若出现 `ModuleNotFoundError: No module named 'paper_tracker'`，请确认：
@@ -223,20 +218,6 @@ paper-tracker fetch-venues \
 ├── pyproject.toml / setup.cfg
 └── README.md
 ```
-
----
-
-## 运行测试
-
-如果你已经为项目编写单元测试（推荐使用 pytest）：
-
-```bash
-pip install -e ".[dev]"  # 若已在项目中配置 dev 依赖
-pytest
-```
-
-可以在 CI（如 GitHub Actions）中添加相同步骤，保证每次修改后核心功能稳定。
-
 ---
 
 ## GitHub Actions

@@ -31,8 +31,8 @@ class KeywordsConfig(BaseModel):
 
     后续如需扩展，可在此处添加字段，并允许 extra。
     """
-    include_keywords: List[str] = Field(default_factory=list)
-    bio_keywords: List[str] = Field(default_factory=list)
+    include_keywords_1: List[str] = Field(default_factory=list)
+    include_keywords_2: List[str] = Field(default_factory=list)
     exclude_keywords: List[str] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="allow")
@@ -41,24 +41,16 @@ class KeywordsConfig(BaseModel):
 # ====== Sources 配置 ======
 
 class SourceConfig(BaseModel):
-    """
-    单个 source 的配置项，对应 sources.yml 中的每个元素。
-    示例:
-      - id: arxiv
-        type: arxiv
-        enabled: true
-        base_url: "http://export.arxiv.org/api/query"
-        server: null
-        search_by:
-          - doi
-          - title
-    """
     id: str
     type: str
     enabled: bool = True
     base_url: Optional[str] = None
     server: Optional[str] = None
     search_by: List[str] = Field(default_factory=list)
+
+    # 新增：能力声明与优先级（阶段3会用到）
+    provides: List[str] = Field(default_factory=list)   # ["metadata","abstract","pdf"]
+    priority: Dict[str, int] = Field(default_factory=dict)  # {"abstract":80, "pdf":90}
 
     model_config = ConfigDict(extra="allow")
 

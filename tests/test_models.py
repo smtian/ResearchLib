@@ -99,6 +99,12 @@ def test_paper_basic_creation_defaults():
     assert p.score_summary is None
     assert p.score_version is None
 
+    assert p.abstract_source is None
+    # assert p.oa_status is None
+    # assert p.oa_source is None
+    assert p.metadata_sources == []
+    assert p.enrichment_version is None
+
     # authors 默认是空列表
     assert isinstance(p.authors, list)
     assert p.authors == []

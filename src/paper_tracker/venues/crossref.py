@@ -6,6 +6,8 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 import requests
+import html
+import re
 
 from paper_tracker.config import VenueConfig
 from paper_tracker.models import Paper
@@ -16,11 +18,32 @@ logger = logging.getLogger(__name__)
 
 
 CROSSREF_BASE_URL = "https://api.crossref.org/works"
-
 # 根据 Crossref 的使用要求，最好设置一个带邮箱的 User-Agent
 # TODO: 把邮箱改成你自己的
 CROSSREF_USER_AGENT = "paper-tracker/0.1 (mailto:your-email@example.com)"
+_TITLE_HTML_TAG_RE = re.compile(r"<[^>]+>")
 
+
+def _clean_crossref_title(raw: str) -> str:
+    """
+    清洗 Crossref 返回的标题字符串：
+    - 解码 HTML 实体（&amp;、&beta; 等）
+    - 去掉所有 HTML 标签（<sup>、<sub>、<i> 等）
+    - 折叠换行和多余空白为单个空格
+    """
+    if not raw:
+        return ""
+
+    # 先解码 HTML 实体
+    text = html.unescape(raw)
+
+    # 去掉所有 HTML 标签
+    text = _TITLE_HTML_TAG_RE.sub("", text)
+
+    # 折叠各种空白（空格、换行、tab）为单个空格
+    text = " ".join(text.split())
+
+    return text
 
 def _pick_crossref_date(item: Dict[str, Any]) -> Optional[datetime]:
     """
@@ -168,7 +191,8 @@ class CrossrefVenueFetcher(BaseVenueFetcher):
         for item in items:
             # 标题
             titles = item.get("title") or []
-            title = titles[0] if titles else "(no title)"
+            raw_title = titles[0] if titles else ""
+            title = _clean_crossref_title(raw_title) or "(no title)"
 
             # DOI
             doi = item.get("DOI") or None

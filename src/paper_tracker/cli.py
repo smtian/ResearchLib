@@ -72,20 +72,20 @@ def _cmd_fetch_venues(args: argparse.Namespace) -> None:
         f"[fetch-venues] total_fetched={total_fetched} total_new={total_new}"
     )
 
-def _cmd_resolve_sources(args: argparse.Namespace) -> None:
+def _cmd_enrich_metadata(args: argparse.Namespace) -> None:
     """
     解析开放获取 PDF 源（骨架版）。
     后续会在这里根据 DOI/标题调用 arxiv/biorxiv 等 source 解析器。
     """
-    print(f"[resolve-sources] since_days={args.since_days}")
+    print(f"[enrich_metadata] since_days={args.since_days}")
 
 
-def _cmd_enrich_and_score(args: argparse.Namespace) -> None:
+def _cmd_score_papers(args: argparse.Namespace) -> None:
     """
     丰富元信息 + 打分（骨架版）。
     后续会在这里拉摘要、计算打分、更新 score_summary。
     """
-    print(f"[enrich-and-score] since_days={args.since_days}  version={args.version}")
+    print(f"[score_papers] since_days={args.since_days}  version={args.version}")
 
 
 def _cmd_generate_daily_report(args: argparse.Namespace) -> None:
@@ -133,21 +133,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_fetch.set_defaults(func=_cmd_fetch_venues)
 
     # resolve-sources
-    p_resolve = subparsers.add_parser(
-        "resolve-sources",
+    p_enrich = subparsers.add_parser(
+        "enrich_metadata",
         help="Resolve open-access PDF URLs from configured sources.",
     )
-    p_resolve.add_argument(
+    p_enrich.add_argument(
         "--since-days",
         type=int,
         default=1,
         help="Only process papers created within the last N days (default: 1).",
     )
-    p_resolve.set_defaults(func=_cmd_resolve_sources)
+    p_enrich.set_defaults(func=_cmd_enrich_metadata)
 
     # enrich-and-score
     p_score = subparsers.add_parser(
-        "enrich-and-score",
+        "score-papers",
         help="Enrich papers with additional metadata and compute scores.",
     )
     p_score.add_argument(
@@ -162,7 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="v1",
         help="Scoring algorithm version label (default: v1).",
     )
-    p_score.set_defaults(func=_cmd_enrich_and_score)
+    p_score.set_defaults(func=_cmd_score_papers)
 
     # generate-daily-report
     p_report = subparsers.add_parser(

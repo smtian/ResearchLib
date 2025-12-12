@@ -1,17 +1,44 @@
 sources:
+  - id: crossref_refresh
+    type: crossref
+    enabled: true
+    provides: ["metadata", "abstract"]
+    search_by: ["doi"]
+    priority:
+      abstract: 30     # 作为 fallback 摘要（质量参差）
+      pdf: 50           # publisher 链接常常不是真正 OA，权重很低
+
+  - id: pubmed
+    type: pubmed
+    enabled: true
+    provides: ["metadata", "abstract"]
+    search_by: ["doi", "title"]
+    priority:
+      abstract: 90     # 期刊版摘要质量最高
+      pdf: 10           # 一般不从 PubMed 拿 pdf
+
+  # - id: pmc
+  #   type: pmc
+  #   enabled: true
+  #   provides: ["pdf"]
+  #   search_by: ["pmcid", "doi"]
+  #   priority:
+  #     pdf: 100         # OA PDF 的主来源
+
   - id: arxiv
     type: arxiv
     enabled: true
-    base_url: "http://export.arxiv.org/api/query"
-    search_by:
-      - doi
-      - title
+    provides: ["abstract", "pdf"]
+    search_by: ["doi", "title"]
+    priority:
+      abstract: 70     # preprint 摘要，高质量，但不是最终版
+      pdf: 80
 
   - id: biorxiv
     type: biorxiv
     enabled: true
-    base_url: "https://api.biorxiv.org/pubs"
-    server: "biorxiv"
-    search_by:
-      - doi
-      - title
+    provides: ["abstract", "pdf"]
+    search_by: ["doi", "title"]
+    priority:
+      abstract: 80     # bio 领域 preprint，摘要质量普遍不错
+      pdf: 80
