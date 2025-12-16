@@ -243,3 +243,62 @@ def upsert_papers(
     save_all_papers(existing_papers, path)
 
     return actually_new
+
+
+def update_papers(
+    updated_papers: List[Paper],
+    index_path: Optional[Path] = None,
+) -> int:
+    """
+    根据 Paper.id 更新索引文件中已有论文的字段，用于写回富集后的元数据。
+
+    行为说明：
+    - 仅根据 id 更新已有记录，不会插入新论文；
+    - 如果 updated_papers 中某个 Paper.id 在索引中不存在，则忽略；
+    - 更新策略是“整条记录替换”：同一 id 的旧 Paper 会被新的 Paper 对象整体替换；
+    - 返回成功更新的论文数量。
+
+    典型用法：
+        papers = load_all_papers()
+        # 在内存中修改 papers 里某些元素的字段...
+        updated_subset = [p for p in papers if ... 被修改过 ...]
+        n = update_papers(updated_subset)
+    """
+    path = index_path or DEFAULT_INDEX_FILE
+
+    # 1. 读取已有数据
+    existing_papers = load_all_papers(path)
+
+    # 构建 id -> index 的位置索引，便于原地替换
+    id_to_index: Dict[str, int] = {}
+    for idx, p in enumerate(existing_papers):
+        pid = getattr(p, "id", None)
+        if pid:
+            id_to_index[pid] = idx
+
+    updated_count = 0
+
+    for p in updated_papers:
+        pid = getattr(p, "id", None)
+        if not pid:
+            # 没有 id 的记录不做更新（通常意味着这不是索引里的旧论文）
+            continue
+
+        idx = id_to_index.get(pid)
+        if idx is None:
+            # 在现有索引中找不到对应 id，忽略
+            continue
+
+        # 用新的 Paper 对象替换旧记录
+        existing_papers[idx] = p
+        updated_count += 1
+
+    if updated_count == 0:
+        return 0
+
+    # 2. 全量重写文件
+    save_all_papers(existing_papers, path)
+
+    return updated_count
+
+

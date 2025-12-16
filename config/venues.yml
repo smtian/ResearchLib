@@ -207,18 +207,20 @@ venues:
     fetcher_params:
       days_back: 1
 
-  - id: database
-    name: "Database: The Journal of Biological Databases and Curation"
-    publisher: "Oxford University Press"
+  - id: nature_genetics
+    name: "Nature Genetics"
+    publisher: "Nature Portfolio"
     issn:
-      online: "1758-0463"
-    website: "https://academic.oup.com/database"
-    tier: "A"
-    topics: ["databases", "biocuration", "resources", "bioinformatics"]
-    notes: "数据库与生物注释，适合抓工具型/资源型论文"
+      print: "1061-4036"
+      online: "1546-1718"
+    website: "https://www.nature.com/ng/"
+    tier: "A+"
+    topics: ["genetics", "genomics", "human genetics", "functional genomics", "population genetics", "disease genetics"]
+    notes: "偏基础与机制/人类遗传学；常见GWAS、功能基因组、疾病遗传、群体与进化遗传等高影响力研究"
     fetcher: crossref
     fetcher_params:
       days_back: 1
+
 
   - id: bioinformatics
     name: "Bioinformatics"

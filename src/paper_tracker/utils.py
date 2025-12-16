@@ -82,30 +82,6 @@ def build_metadata_sources() -> Tuple[Dict[str, SourceConfig], Dict[str, object]
     return cfg_by_id, instances_by_id
 
 
-def store_full_abstract(paper_id: str, source_id: str, abstract: str) -> None:
-    """
-    full abstract 冷存储：按 YYYY-MM 分片写入 data/cold/abstracts/YYYY-MM.jsonl.gz
-    """
-    if not abstract:
-        return
-
-    COLD_ABSTRACT_BASE.mkdir(parents=True, exist_ok=True)
-    now = datetime.now(timezone.utc)
-    shard_name = now.strftime("%Y-%m") + ".jsonl.gz"
-    shard_path = COLD_ABSTRACT_BASE / shard_name
-
-    record = {
-        "paper_id": paper_id,
-        "source_id": source_id,
-        "abstract": abstract,
-        "enrichment_version": ENRICHMENT_VERSION,
-        "fetched_at": now.isoformat(),
-    }
-
-    with gzip.open(shard_path, "at", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
-
-
 def select_best_fields(
     cfg_by_id: Dict[str, SourceConfig],
     results: Dict[str, SourceEnrichmentResult],
@@ -146,7 +122,7 @@ def select_best_fields(
                 best_abs_weight = weight
                 best_abstract = res.abstract
                 best_abs_source = sid
-
+    
     return best_pdf_url, best_pdf_source, best_abstract, best_abs_source
 
 
@@ -187,3 +163,91 @@ def paper_needs_enrichment(paper: Paper, since_days: int, now: datetime) -> bool
     except TypeError:
         # 混用 naïve/aware datetime 时，简单起见认为需要
         return True
+    
+
+def store_full_abstract(paper_id: str, source_id: str, abstract: str) -> None:
+    """
+    full abstract 冷存储：按 YYYY-MM 分片写入 data/cold/abstracts/YYYY-MM.jsonl.gz
+    """
+    if not abstract:
+        return
+
+    COLD_ABSTRACT_BASE.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    shard_name = now.strftime("%Y-%m") + ".jsonl.gz"
+    shard_path = COLD_ABSTRACT_BASE / shard_name
+
+    record = {
+        "paper_id": paper_id,
+        "source_id": source_id,
+        "abstract": abstract,
+        "enrichment_version": ENRICHMENT_VERSION,
+        "fetched_at": now.isoformat(),
+    }
+
+    with gzip.open(shard_path, "at", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+def load_full_abstract(paper_id: str) -> Optional[str]:
+    """
+    从冷存储中读取指定 paper_id 的 full abstract。
+
+    - 遍历 data/cold/abstracts/*.jsonl.gz 分片；
+    - 过滤出 paper_id 匹配的记录；
+    - 如果有多条，按 fetched_at 取最新一条；
+    - 找不到则返回 None。
+
+    目前是简单实现：线性扫描所有分片。
+    后续如果摘要量级很大，可以再加索引或缓存优化。
+    """
+    if not paper_id:
+        return None
+
+    if not COLD_ABSTRACT_BASE.exists():
+        return None
+
+    latest_abstract: Optional[str] = None
+    latest_ts: Optional[datetime] = None
+
+    # 遍历所有分片文件（按文件名排序只是为了稳定性）
+    for shard_path in sorted(COLD_ABSTRACT_BASE.glob("*.jsonl.gz")):
+        try:
+            with gzip.open(shard_path, "rt", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        # 略过坏行
+                        continue
+
+                    if record.get("paper_id") != paper_id:
+                        continue
+
+                    abstract = record.get("abstract")
+                    if not abstract:
+                        continue
+
+                    fetched_at_raw = record.get("fetched_at")
+                    ts: Optional[datetime] = None
+                    if fetched_at_raw:
+                        try:
+                            ts = datetime.fromisoformat(fetched_at_raw)
+                        except ValueError:
+                            ts = None
+
+                    # 选 fetched_at 最新的一条记录
+                    if latest_abstract is None:
+                        latest_abstract = abstract
+                        latest_ts = ts
+                    else:
+                        if ts is not None and (latest_ts is None or ts > latest_ts):
+                            latest_abstract = abstract
+                            latest_ts = ts
+        except FileNotFoundError:
+            # 分片刚好被删除，忽略即可
+            continue
+
+    return latest_abstract

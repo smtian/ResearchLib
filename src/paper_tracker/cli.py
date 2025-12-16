@@ -1,16 +1,21 @@
 # src/paper_tracker/cli.py
 from __future__ import annotations
 
+from pathlib import Path
 import sys
 import argparse
 import logging
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime, timezone, timedelta, date
+from typing import Optional, Any
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+from paper_tracker.storage import upsert_papers, load_all_papers, update_papers
+
 
 # ----------for venues--------------
 from paper_tracker.config import load_venues
 from paper_tracker.venues import create_fetchers_for_config
-from paper_tracker.storage import upsert_papers, load_all_papers
 from paper_tracker.utils import _effective_days_back_for_venue
 
 # ----------for sources--------------
@@ -22,6 +27,13 @@ from paper_tracker.utils import (
     ENRICHMENT_VERSION,
 )
 from paper_tracker.sources.base import SourceEnrichmentResult
+
+# ----------for scoring-------------
+from paper_tracker.scoring.composite import (
+    score_paper,
+    SCORING_PIPELINE_VERSION,
+)
+from paper_tracker.utils import load_full_abstract  
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, force=True)
@@ -88,94 +100,279 @@ def _cmd_enrich_metadata(args: argparse.Namespace) -> None:
     if not target_papers:
         print("[enrich_metadata] no papers to enrich.")
         return
-
     updated = []
     total = len(target_papers)
 
-    for idx, paper in enumerate(target_papers, start=1):
-        per_source_results: dict[str, SourceEnrichmentResult] = {}
+    # 为所有 paper 复用一个线程池，避免频繁创建/销毁线程
+    max_workers = max(1, min(8, len(instances_by_id)))  # 8 可以根据需要调小/调大
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for idx, paper in enumerate(target_papers, start=1):
+            per_source_results: dict[str, SourceEnrichmentResult] = {}
 
-        for sid, src in instances_by_id.items():
-            try:
-                res = src.enrich(paper)
-            except Exception as exc:
-                logger.warning(
-                    "enrich_metadata: source '%s' failed for paper id=%s: %s",
-                    sid,
-                    getattr(paper, "id", None),
-                    exc,
-                )
+            # 并发调用各个 source 的 enrich(paper)
+            future_to_sid = {
+                executor.submit(src.enrich, paper): sid
+                for sid, src in instances_by_id.items()
+            }
+
+            for future in as_completed(future_to_sid):
+                sid = future_to_sid[future]
+                try:
+                    res = future.result()
+                except Exception as exc:
+                    logger.warning(
+                        "enrich_metadata: source '%s' failed for paper id=%s: %s",
+                        sid,
+                        getattr(paper, "id", None),
+                        exc,
+                    )
+                    continue
+
+                if res.confidence > 0 and (res.pdf_url or res.abstract or res.metadata):
+                    per_source_results[sid] = res
+
+            if not per_source_results:
                 continue
 
-            if res.confidence > 0 and (res.pdf_url or res.abstract or res.metadata):
-                per_source_results[sid] = res
-
-        if not per_source_results:
-            continue
-
-        best_pdf_url, pdf_source_id, best_abstract, abs_source_id = select_best_fields(
-            cfg_by_id, per_source_results
-        )
-
-        changed = False
-
-        # 更新 pdf_url
-        if best_pdf_url and best_pdf_url != getattr(paper, "pdf_url", None):
-            paper.pdf_url = best_pdf_url
-            changed = True
-
-        # 更新摘要相关：full abstract 写冷存储 + abstract_source / enrichment_version 写回索引
-        if best_abstract and abs_source_id:
-            store_full_abstract(paper.id, abs_source_id, best_abstract)
-
-            if hasattr(paper, "abstract_source"):
-                if getattr(paper, "abstract_source", None) != abs_source_id:
-                    paper.abstract_source = abs_source_id
-                    changed = True
-
-            if hasattr(paper, "enrichment_version"):
-                if getattr(paper, "enrichment_version", None) != ENRICHMENT_VERSION:
-                    paper.enrichment_version = ENRICHMENT_VERSION
-                    changed = True
-
-        if changed:
-            updated.append(paper)
-
-        if idx % 5 == 0:
-            logger.info(
-                "enrich_metadata progress: %d/%d papers processed, %d updated",
-                idx,
-                total,
-                len(updated),
+            best_pdf_url, pdf_source_id, best_abstract, abs_source_id = select_best_fields(
+                cfg_by_id, per_source_results
             )
+
+            changed = False
+
+            # 更新 pdf_url
+            if best_pdf_url and best_pdf_url != getattr(paper, "pdf_url", None):
+                paper.pdf_url = best_pdf_url
+                changed = True
+
+            # 更新摘要相关：full abstract 写冷存储 + abstract_source / enrichment_version 写回索引
+            if best_abstract and abs_source_id:
+                store_full_abstract(paper.id, abs_source_id, best_abstract)
+
+                if hasattr(paper, "abstract_source"):
+                    if getattr(paper, "abstract_source", None) != abs_source_id:
+                        paper.abstract_source = abs_source_id
+                        changed = True
+
+                if hasattr(paper, "enrichment_version"):
+                    if getattr(paper, "enrichment_version", None) != ENRICHMENT_VERSION:
+                        paper.enrichment_version = ENRICHMENT_VERSION
+                        changed = True
+
+            if changed:
+                updated.append(paper)
+
+            if idx % 5 == 0:
+                logger.info(
+                    "enrich_metadata progress: %d/%d papers processed, %d updated",
+                    idx,
+                    total,
+                    len(updated),
+                )
 
     if not updated:
         print("[enrich_metadata] no papers updated.")
         return
 
     # 写回索引
-    new_items = upsert_papers(updated)
+    updated_count = update_papers(updated)
     print(
         f"[enrich_metadata] processed={len(target_papers)}, "
-        f"updated={len(updated)}, newly_inserted={len(new_items)}"
+        f"updated={len(updated)}, newly_inserted={updated_count}"
     )
 
 
 
 def _cmd_score_papers(args: argparse.Namespace) -> None:
     """
-    丰富元信息 + 打分（骨架版）。
-    后续会在这里拉摘要、计算打分、更新 score_summary。
+    纯离线打分：
+
+    - 根据 since_days 选取需要打分的论文；
+    - 从冷存储加载 full abstract（如有）；
+    - 调用 scoring.composite.score_paper 计算分数；
+    - 更新 Paper.score_summary / score_version / updated_at，并写回索引。
     """
-    print(f"[score_papers] since_days={args.since_days}  version={args.version}")
+    now = datetime.now(timezone.utc)
+
+    cutoff: datetime | None = None
+    if getattr(args, "since_days", None) is not None:
+        cutoff = now - timedelta(days=args.since_days)
+
+    # 目标 score 版本：优先使用命令行参数，否则使用当前流水线版本
+    target_version: str = getattr(args, "version", None) or SCORING_PIPELINE_VERSION
+
+    papers = load_all_papers()
+    updated = 0
+    skipped = 0
+    total_candidates = 0
+
+    for paper in papers:
+        # 1) 按时间过滤
+        if cutoff is not None:
+            created_at = getattr(paper, "created_at", None)
+            created_dt: datetime | None
+
+            if isinstance(created_at, datetime):
+                created_dt = created_at
+            elif isinstance(created_at, str):
+                try:
+                    # Python3.11+ 支持 fromisoformat 解析带 offset 的时间
+                    created_dt = datetime.fromisoformat(created_at)
+                except ValueError:
+                    created_dt = None
+            else:
+                created_dt = None
+
+            if created_dt is not None and created_dt < cutoff:
+                continue
+
+        # 2) 按版本过滤：已有 score_version 且已是目标版本，则跳过
+        # current_sv = getattr(paper, "score_version", None)
+        # if current_sv == target_version:
+        #     skipped += 1
+        #     continue
+
+        total_candidates += 1
+
+        # 3) 从冷存储读取 full abstract（如果不存在则返回 None）
+        full_abstract = load_full_abstract(paper.id)
+
+        # 4) 调用打分流水线
+        result = score_paper(paper, full_abstract)
+
+        # 5) 写回 score_summary / score_version / updated_at
+        summary: dict[str, object] = {
+            "total_score": float(result.total_score),
+            "components": dict(result.components),
+        }
+        tags = getattr(result, "tags", None)
+        if tags:
+            summary["tags"] = list(tags)
+
+        paper.score_summary = summary
+        paper.score_version = target_version
+        paper.updated_at = now
+
+        updated += 1
+
+    # 6) 持久化到索引文件
+    update_papers(papers)
+
+    print(
+        f"[score_papers] since_days={getattr(args, 'since_days', None)} "
+        f"target_version={target_version!r} "
+        f"candidates={total_candidates} updated={updated} skipped={skipped}"
+    )
 
 
 def _cmd_generate_daily_report(args: argparse.Namespace) -> None:
     """
-    生成日报（骨架版）。
-    后续会在这里从索引中筛选指定日期新增的论文并输出到 reports/daily。
+    生成日报：
+
+    - 从索引中读取所有论文；
+    - 选取 created_at 落在指定日期的论文；
+    - 过滤掉没有打分或分数低于 min_score 的论文；
+    - 按 total_score 降序排序；
+    - 输出 reports/daily/YYYY-MM-DD.md。
     """
-    print(f"[generate-daily-report] date={args.date}")
+    # 解析日期参数
+    try:
+        target_date: date = datetime.fromisoformat(args.date).date()
+    except ValueError as exc:
+        raise SystemExit(f"Invalid --date value: {args.date!r}, expected YYYY-MM-DD") from exc
+
+    min_score = float(getattr(args, "min_score", 0.0))
+
+    # 读取索引
+    papers = load_all_papers()
+
+    # 过滤出指定日期 + 分数足够的论文
+    candidates: list[tuple[float, Any]] = []  # (score, paper)
+
+    for paper in papers:
+        created_at = getattr(paper, "created_at", None)
+
+        created_dt: datetime | None
+        if isinstance(created_at, datetime):
+            created_dt = created_at
+        elif isinstance(created_at, str):
+            try:
+                created_dt = datetime.fromisoformat(created_at)
+            except ValueError:
+                created_dt = None
+        else:
+            created_dt = None
+
+        if created_dt is None:
+            continue
+
+        if created_dt.date() != target_date:
+            continue
+
+        summary = getattr(paper, "score_summary", None)
+        if not isinstance(summary, dict):
+            continue
+
+        score = summary.get("total_score")
+        if score is None:
+            continue
+
+        try:
+            score_val = float(score)
+        except (TypeError, ValueError):
+            continue
+
+        if score_val < min_score:
+            continue
+
+        candidates.append((score_val, paper))
+
+    # 按分数降序排序
+    candidates.sort(key=lambda x: x[0], reverse=True)
+
+    report_dir = Path("reports") / "daily"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    report_path = report_dir / f"{target_date.isoformat()}.md"
+
+    lines: list[str] = []
+    lines.append(f"# Daily Report for {target_date.isoformat()}")
+    lines.append("")
+    lines.append(f"- Minimum score: {min_score}")
+    lines.append(f"- Papers: {len(candidates)}")
+    lines.append("")
+
+    if not candidates:
+        lines.append("_No papers matched the criteria._")
+    else:
+        for idx, (score_val, paper) in enumerate(candidates, start=1):
+            title = getattr(paper, "title", "") or ""
+            journal = getattr(paper, "journal", "") or ""
+            doi = getattr(paper, "doi", "") or ""
+            pdf_url = getattr(paper, "pdf_url", "") or ""
+            abstract = load_full_abstract(paper.id)
+
+            lines.append(f"## {idx}. {title}")
+            if journal:
+                lines.append(f"- Journal: {journal}")
+            lines.append(f"- Score: {score_val:.2f}")
+            if doi:
+                lines.append(f"- DOI: {doi}")
+            if pdf_url:
+                lines.append(f"- PDF: {pdf_url}")
+            if abstract:
+                lines.append("")
+                lines.append("**Abstract**")
+                lines.append("")
+                lines.append(abstract)
+            lines.append("")  # 分隔空行
+
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+
+    print(
+        f"[generate-daily-report] date={target_date.isoformat()} "
+        f"min_score={min_score} output={report_path}"
+    )
+
 
 
 def _cmd_cleanup(args: argparse.Namespace) -> None:
@@ -216,7 +413,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # resolve-sources
     p_enrich = subparsers.add_parser(
-        "enrich_metadata",
+        "enrich-metadata",
         help="Resolve open-access PDF URLs from configured sources.",
     )
     p_enrich.add_argument(
@@ -256,6 +453,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=str,
         default=datetime.today().isoformat(),
         help="Date for the report in YYYY-MM-DD format (default: today).",
+    )
+    p_report.add_argument(
+        "--min-score",
+        type=float,
+        default=11.0,
+        help="Min score of selected papers in the report.",
     )
     p_report.set_defaults(func=_cmd_generate_daily_report)
 
