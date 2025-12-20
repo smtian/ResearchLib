@@ -10,7 +10,12 @@ from typing import Optional, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-from paper_tracker.storage import upsert_papers, load_all_papers, update_papers
+from paper_tracker.storage import (
+    upsert_papers,
+    load_all_papers,
+    update_papers,
+    save_all_papers,
+)
 
 
 # ----------for venues--------------
@@ -25,6 +30,7 @@ from paper_tracker.utils import (
     select_best_fields,
     paper_needs_enrichment,
     ENRICHMENT_VERSION,
+    COLD_ABSTRACT_BASE,
 )
 from paper_tracker.sources.base import SourceEnrichmentResult
 
@@ -33,7 +39,7 @@ from paper_tracker.scoring.composite import (
     score_paper,
     SCORING_PIPELINE_VERSION,
 )
-from paper_tracker.utils import load_full_abstract  
+from paper_tracker.utils import load_full_abstract
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, force=True)
@@ -380,7 +386,81 @@ def _cmd_cleanup(args: argparse.Namespace) -> None:
     清理历史数据（骨架版）。
     包括：删除过旧的日报、冷数据分片等。
     """
-    print(f"[cleanup] keep_days={args.keep_days}")
+    keep_days = max(int(getattr(args, "keep_days", 0) or 0), 0)
+    cutoff_dt = datetime.now(timezone.utc) - timedelta(days=keep_days)
+    cutoff_date = cutoff_dt.date()
+
+    # 1)
+    reports_dir = Path("reports") / "daily"
+    reports_deleted = 0
+    if reports_dir.is_dir():
+        for md_file in reports_dir.glob("*.md"):
+            try:
+                report_date = datetime.fromisoformat(md_file.stem).date()
+            except ValueError:
+                continue
+            if report_date < cutoff_date:
+                md_file.unlink(missing_ok=True)
+                reports_deleted += 1
+
+    # 2) 
+    cold_deleted = 0
+    if COLD_ABSTRACT_BASE.exists():
+        for shard in COLD_ABSTRACT_BASE.glob("*.jsonl.gz"):
+            shard_key = Path(shard.stem).stem  # "2025-01.jsonl.gz" -> "2025-01"
+            try:
+                shard_month = datetime.strptime(shard_key, "%Y-%m").date()
+            except ValueError:
+                continue
+
+            if shard_month.month == 12:
+                next_month = date(shard_month.year + 1, 1, 1)
+            else:
+                next_month = date(shard_month.year, shard_month.month + 1, 1)
+            shard_last_day = next_month - timedelta(days=1)
+
+            if shard_last_day < cutoff_date:
+                shard.unlink(missing_ok=True)
+                cold_deleted += 1
+
+    # 3) 
+    papers = load_all_papers()
+    retained: list[Any] = []
+    papers_deleted = 0
+
+    def _parse_dt(value: Any) -> datetime | None:
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            try:
+                return datetime.fromisoformat(value)
+            except ValueError:
+                return None
+        return None
+
+    for paper in papers:
+        ts = (
+            _parse_dt(getattr(paper, "updated_at", None))
+            or _parse_dt(getattr(paper, "created_at", None))
+        )
+
+        if ts is not None and ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+
+        if ts is not None and ts < cutoff_dt:
+            papers_deleted += 1
+            continue
+
+        retained.append(paper)
+
+    if papers_deleted:
+        save_all_papers(retained)
+
+    print(
+        f"[cleanup] keep_days={keep_days} cutoff={cutoff_dt.isoformat()} "
+        f"reports_deleted={reports_deleted} cold_shards_deleted={cold_deleted} "
+        f"papers_deleted={papers_deleted} papers_remaining={len(retained)}"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -465,13 +545,13 @@ def build_parser() -> argparse.ArgumentParser:
     # cleanup
     p_cleanup = subparsers.add_parser(
         "cleanup",
-        help="Cleanup old reports and optional cold data.",
+        help="Cleanup old reports, papers and cold data.",
     )
     p_cleanup.add_argument(
         "--keep-days",
         type=int,
         default=90,
-        help="Number of days of reports to keep (default: 90).",
+        help="Number of days to keep (default: 90).",
     )
     p_cleanup.set_defaults(func=_cmd_cleanup)
 
