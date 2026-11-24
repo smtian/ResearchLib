@@ -1,0 +1,26 @@
+http:
+  timeout_seconds: 20
+  max_retries: 3
+  backoff_seconds: 0.5
+  max_backoff_seconds: 30
+  cooldown_seconds: 60
+  consecutive_429_threshold: 3
+  memory_cache_ttl_seconds: 300
+  request_budget_per_source: 100
+providers:
+  openalex: {enabled: true, per_page: 50, semantic_search: false}
+  europe_pmc: {enabled: true, per_page: 50}
+  pubmed: {enabled: true, per_page: 50}
+  crossref: {enabled: true, per_page: 50}
+search:
+  quick_candidate_limit: 300
+  deep_candidate_limit: 1500
+  max_pages_per_query: 5
+  default_result_limit: 30
+tracking:
+  topics_file: config/topics.yml
+  venues_file: config/venues.yml
+  arxiv_page_size: 50
+  arxiv_min_interval: 3.0
+  preprint_page_size: 100
+  max_pages_per_source: 3

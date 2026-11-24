@@ -1,0 +1,180 @@
+venues:
+  nature:
+    name: Nature
+    issn_print: 0028-0836
+    issn_online: 1476-4687
+    tags: [multidisciplinary]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  science:
+    name: Science
+    issn_print: 0036-8075
+    issn_online: 1095-9203
+    tags: [multidisciplinary]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  cell:
+    name: Cell
+    issn_print: 0092-8674
+    issn_online: 1097-4172
+    tags: [cell-biology, genomics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: ISSN Portal and NLM Catalog
+  nature-communications:
+    name: Nature Communications
+    issn_print: null
+    issn_online: 2041-1723
+    tags: [multidisciplinary]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  science-advances:
+    name: Science Advances
+    issn_print: null
+    issn_online: 2375-2548
+    tags: [multidisciplinary]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  pnas:
+    name: Proceedings of the National Academy of Sciences
+    aliases: [PNAS]
+    issn_print: 0027-8424
+    issn_online: 1091-6490
+    tags: [multidisciplinary]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nature-medicine:
+    name: Nature Medicine
+    issn_print: 1078-8956
+    issn_online: 1546-170X
+    tags: [medicine, translational]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nature-methods:
+    name: Nature Methods
+    issn_print: 1548-7091
+    issn_online: 1548-7105
+    tags: [methods, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Nature Portfolio journal information
+  nature-biotechnology:
+    name: Nature Biotechnology
+    issn_print: 1087-0156
+    issn_online: 1546-1696
+    tags: [biotechnology, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nature-genetics:
+    name: Nature Genetics
+    issn_print: 1061-4036
+    issn_online: 1546-1718
+    tags: [genetics, genomics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nature-biomedical-engineering:
+    name: Nature Biomedical Engineering
+    issn_print: null
+    issn_online: 2157-846X
+    tags: [biomedical-engineering, medicine]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Nature Portfolio journal information
+  nature-ecology-evolution:
+    name: Nature Ecology & Evolution
+    issn_print: null
+    issn_online: 2397-334X
+    tags: [ecology, evolution]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Nature Portfolio journal information
+  genome-biology:
+    name: Genome Biology
+    issn_print: null
+    issn_online: 1474-760X
+    tags: [genomics, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  genome-research:
+    name: Genome Research
+    issn_print: 1088-9051
+    issn_online: 1549-5469
+    tags: [genomics, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nucleic-acids-research:
+    name: Nucleic Acids Research
+    aliases: [NAR]
+    issn_print: 0305-1048
+    issn_online: 1362-4962
+    tags: [genomics, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  nar-genomics-bioinformatics:
+    name: NAR Genomics and Bioinformatics
+    issn_print: null
+    issn_online: 2631-9268
+    tags: [genomics, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  bioinformatics:
+    name: Bioinformatics
+    issn_print: 1367-4803
+    issn_online: 1367-4811
+    tags: [bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 3, max_pages: 3}
+    verified_by: Crossref journals API
+  plos-computational-biology:
+    name: PLOS Computational Biology
+    issn_print: 1553-734X
+    issn_online: 1553-7358
+    tags: [bioinformatics, computational-biology]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  briefings-bioinformatics:
+    name: Briefings in Bioinformatics
+    issn_print: 1467-5463
+    issn_online: 1477-4054
+    tags: [bioinformatics, reviews]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  cell-systems:
+    name: Cell Systems
+    issn_print: 2405-4712
+    issn_online: 2405-4720
+    tags: [systems-biology, bioinformatics]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: ISSN Portal
+  protein-science:
+    name: Protein Science
+    issn_print: 0961-8368
+    issn_online: 1469-896X
+    tags: [protein-science]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+  gut:
+    name: Gut
+    issn_print: 0017-5749
+    issn_online: 1468-3288
+    tags: [microbiome, medicine]
+    enabled: true
+    fetch: {rows: 50, overlap_days: 2, max_pages: 2}
+    verified_by: Crossref journals API
+

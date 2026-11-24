@@ -1,0 +1,76 @@
+topics:
+  ai-ml:
+    name: AI/ML General Methods
+    strategy: OR
+    synonyms: [artificial intelligence, machine learning, deep learning]
+    include: [neural network, foundation model, representation learning]
+    exclude: [clinical image diagnosis]
+    related_terms: [transformer, self-supervised learning, transfer learning]
+    chinese_terms:
+      人工智能: artificial intelligence
+      机器学习: machine learning
+      深度学习: deep learning
+  protein-language-models:
+    name: Protein Language Models
+    strategy: AND
+    synonyms: [protein language model, protein language models, protein foundation model]
+    include: [protein sequence, amino acid sequence, protein representation]
+    exclude: [natural language protein name extraction]
+    related_terms: [ESM, ProtTrans, protein embedding, sequence foundation model]
+    chinese_terms:
+      蛋白质语言模型: protein language model
+      蛋白质基础模型: protein foundation model
+  small-orfs:
+    name: Small ORFs / Microproteins
+    strategy: OR
+    synonyms: [small ORF, sORF, smORF, microprotein, micropeptide]
+    include: [small open reading frame, short ORF, unannotated protein]
+    exclude: [small cell lung cancer]
+    related_terms: [ribosome profiling, Ribo-seq, de novo gene, alternative ORF]
+    chinese_terms:
+      小开放阅读框: small ORF
+      微蛋白: microprotein
+      微肽: micropeptide
+  coding-potential:
+    name: Coding Potential Prediction
+    strategy: AND
+    synonyms: [coding potential, coding probability, protein-coding potential]
+    include: [noncoding RNA, ORF prediction, gene annotation]
+    exclude: [medical coding]
+    related_terms: [lncRNA, translated ORF, ribosome profiling, sequence classifier]
+    chinese_terms:
+      编码潜力: coding potential
+      编码能力: coding potential
+      非编码RNA: noncoding RNA
+  microbiome-metagenomics:
+    name: Microbiome / Metagenomics
+    strategy: OR
+    synonyms: [microbiome, metagenomics, metagenome]
+    include: [microbial community, microbiota, shotgun metagenomics]
+    exclude: [macrobiome]
+    related_terms: [metatranscriptomics, microbial ecology, genome-resolved metagenomics]
+    chinese_terms:
+      微生物组: microbiome
+      宏基因组: metagenomics
+      微生物群: microbiota
+  antimicrobial-peptides:
+    name: Antimicrobial Peptides
+    strategy: OR
+    synonyms: [antimicrobial peptide, antimicrobial peptides, AMP]
+    include: [host defense peptide, bacteriocin, peptide antibiotic]
+    exclude: [adenosine monophosphate]
+    related_terms: [antibacterial peptide, peptide discovery, resistance]
+    chinese_terms:
+      抗菌肽: antimicrobial peptide
+      宿主防御肽: host defense peptide
+  bioinformatics:
+    name: Bioinformatics
+    strategy: OR
+    synonyms: [bioinformatics, computational biology]
+    include: [biological data analysis, omics analysis, sequence analysis]
+    exclude: []
+    related_terms: [genomics, proteomics, transcriptomics, workflow]
+    chinese_terms:
+      生物信息学: bioinformatics
+      计算生物学: computational biology
+
